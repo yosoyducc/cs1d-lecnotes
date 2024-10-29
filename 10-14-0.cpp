@@ -22,6 +22,7 @@ Types of trees:
 * Full binary trees are trees where all nodes have 0-2 children.
 * Perfect trees are where all nodes have two members and all leaves
   have the same depth/level.
+* Complete tree is where all nodes are continuous from left to right (I DON'T KNOW HOW TO DEFINE THIS HELP)
 * Some others IDK look at Wikipedia.
 * There's also AVL trees, which are balanced trees. In AVL, all subtrees
   of every node should differ in height by no more than 1 to count as such.
