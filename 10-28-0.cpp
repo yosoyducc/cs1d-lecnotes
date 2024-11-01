@@ -104,7 +104,7 @@ Delete the smallest node. It is still a complete tree.
 
 //#include "function.h"
 
-#include <climits>
+#include <climits>  // INT_MIN
 #include <iostream>
 #include <vector>
 
@@ -138,68 +138,197 @@ private:
     }
 
 public:
+    void printHeap()
+    {
+        cout << "\n[";
+        for (size_t i = 0; i < heap.size(); ++i)
+        {
+            cout << heap[i];
+            if (i < heap.size() - 1)
+                cout << ", ";
+        }
+        cout << "]" << endl;
+    }
+
+    const vector<int> &getHeap() const
+    {
+        return heap;
+    }
+
     void insert(int value)
     {
+        // Add the new value at the end of the heap array.
+        // This might temporarily break the heap's property.
         heap.push_back(value);
+        // Set 'current' to the index of the newly added element
         int current = heap.size() - 1;
 
+        // Start a loop to restore the heap property. This loop
+        // continues as long as 'current' isn't the root (index 0)
+        // and the current element is larger than its parent. This
+        // is essential for maintaining the max heap property.
         while (current > 0 && heap[current] > heap[parent(current)])
         {
+            // Swap the current element with its parent if the
+            // current element is larger. This is a step towards
+            // restoring the max heap property bu ensuring that a 
+            // parent node is always larger than its children.
             swap(current, parent(current));
+            // Move up the tree by setting 'current to the index
+            // of the parent node. This step is crucial for the
+            // iterative comparison of the newly inserted value
+            // with its ancestors, ensuring the heap's integrity.
             current = parent(current);
         }
     }
 
     void sinkDown(int idx)
     {
+        // Initialize maxIndex with the current index. This variable
+        // will be used to find the largest of the current node and
+        // its children.
         int maxIdx = idx;
-
+        // Enter a loop that continues indefinitely until explicitly
+        // broken out of. The purpose is to restore heap property.
         while (true)
         {
+            // Calclulate the indices of the left and right children
+            // of the current node.
             int leftIdx = leftChild(idx);
             int rightIdx = rightChild(idx);
 
+            // If the left child exists and is greater than the
+            // current node, update maxIndex to leftIndex. This
+            // step identifies the larger of the two children.
             if (leftIdx < heap.size() && heap[leftIdx] > heap[maxIdx])
                 maxIdx = leftIdx;
 
+            // Perform a similar check for the right child. If the
+            // right child exists and is greater than the current
+            // max (either the parent or left child), update maxIndex
+            // to rightIndex. This ensures maxIndex points to the
+            // largest of the parent and its two children.
             if (rightIdx < heap.size() && heap[rightIdx] > heap[maxIdx])
                 maxIdx = rightIdx;
 
+            // If maxIndex has been updated, indicating that either
+            // the left or right child is larger than the parent,
+            // swap the parent with this larger child. This is a
+            // key step in restoring the max heap property by
+            // ensuring parents are larger than their children.
             if (maxIdx != idx) {
                 swap(idx, maxIdx);
+                // Update index to maxIndex for the next iteration.
+                // This move down the tree, continuing to adjust
+                // the heap as needed.
                 idx = maxIdx;
             }
             else
             {
+                // If maxIndex has not changed, the heap property
+                // has been restored for this subtree, and the loop
+                // can be exited.
                 return;
             }
         }
     }
 
-    int remove(int value)
+    /* NOTICE: in the in-class lecture there was argument `int value`
+     * here, but it went unused in this function anyway. */
+    int remove()
     {
+        // Check if the heap is empty. If it is,
+        // return the minimum integer value as an
+        // indication of an underflow condition.
         if (heap.empty())
             return INT_MIN;
     
+        // Store the value at the root of the heap.
+        // This is the maximum value in a max heap.
         int maxValue = heap.front();
 
+        // If the heap only contains one element,
+        // simply remove it and return its value.
         if (heap.size() == 1)
         {
             heap.pop_back();
         }
         else
         {
+            // Replace the root of the heap with the last element
+            // in the heap. This action maintains the completeness
+            // of the binary tree but may violate the heap property.
             heap[0] = heap.back();
+            // Remove the last element as it's now moved to the root.
             heap.pop_back();
+            // Call sinkDown to restore the max heap property starting
+            // from the root. This method adjusts the position of the
+            // new root by moving it down the tree until the heap property
+            // is restored.
             sinkDown(0);
         }
 
+        // Return the maximum value that was removed from the heap.
         return maxValue;
     }
 };
 
 
+void test();
+
 int main()
 {
-    // c
+    test();
+
+    return 0;
+}
+
+void test()
+{
+    Heap heap;
+
+    // Insert values into the heap
+    vector<int> values = { 10, 20, 30, 5, 15, 25, 35 };
+    cout << "Inserting values: ";
+    for (int v : values)
+    {
+        cout << v << " ";
+        heap.insert(v);
+    }
+    cout << "\nInitial Heap: ";
+    heap.printHeap();
+
+    // Remove values from the heap and test after each removal
+    while (!heap.getHeap().empty())
+    {
+        int removedValue = heap.remove();
+        cout << "\nRemoved Value: " << removedValue;
+        cout << "\nHeap after removal: ";
+        heap.printHeap();
+
+        // Verify max heap property
+        const vector<int> &currentHeap = heap.getHeap();
+        bool isValidMaxHeap = true;
+        for (size_t i = 0; i < currentHeap.size(); ++i)
+        {
+            int left = 2 * i + 1;  // Calculating left child index
+            int right = 2 * i + 2;  // Calculating right child index
+            if (left < currentHeap.size() && currentHeap[i] < currentHeap[left])
+            {
+                isValidMaxHeap = false;
+                break;
+            }
+            if (right < currentHeap.size() && currentHeap[i] < currentHeap[right])
+            {
+                isValidMaxHeap = false;
+                break;
+            }
+        }
+
+        cout << "\nMax Heap Property Valid? " << (isValidMaxHeap ? "Yes" : "No") << "\n";
+    }
+
+    // Check if heap is empty at the end
+    cout << "\nFinal Heap (Should be empty): ";
+    heap.printHeap();
 }
