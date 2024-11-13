@@ -58,7 +58,7 @@ private:
         for (int i = 0; i < key.length(); ++i)
         {
             int asciiValue = hash + key[i];
-            hash = hash + asciiValue * 23 % SIZE;
+            hash = (hash + asciiValue * 23) % SIZE;
         }
 
         return hash;
